@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A L I A R T E — Aros bordados a mano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Jost:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bone:#F7F3EC;
+    --paper:#FDFBF7;
+    --ink:#2A2118;
+    --taupe:#8C7A68;
+    --clay:#A65C4A;
+    --clay-soft:#E9D3CC;
+    --gold:#B9924F;
+    --line:#E1D5C2;
+    --green:#5B6E52;
+    --amber:#B9812F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bone);
+    color:var(--ink);
+    font-family:'Jost', sans-serif;
+    font-weight:300;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+  }
+  a{color:inherit;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:500; letter-spacing:-0.01em;}
+  .mono{font-family:'Space Mono', monospace;}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(247,243,236,0.9);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:22px 32px;}
+  .brand{
+    font-family:'Fraunces', serif; font-weight:500; font-size:22px;
+    letter-spacing:0.32em;
+  }
+  .brand span{color:var(--clay);}
+  nav.links{display:flex; gap:36px; font-size:14px; letter-spacing:0.04em;}
+  nav.links a{text-decoration:none; color:var(--ink); opacity:0.75; transition:opacity .2s;}
+  nav.links a:hover{opacity:1;}
+  .nav-toggle{display:none; background:none; border:none; font-size:22px; cursor:pointer; color:var(--ink);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:88px 32px 80px;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center;
+    max-width:1180px; margin:0 auto;
+  }
+  .hero .eyebrow{
+    font-family:'Space Mono', monospace; font-size:12px; letter-spacing:0.18em;
+    color:var(--clay); text-transform:uppercase; margin-bottom:18px; display:block;
+  }
+  .hero h1{
+    font-size:clamp(40px, 5.4vw, 68px); line-height:1.04; font-weight:500;
+  }
+  .hero h1 em{font-style:italic; font-weight:400; color:var(--clay);}
+  .hero p.lead{
+    margin-top:22px; max-width:420px; color:var(--taupe); font-size:17px;
+  }
+  .hero .cta-row{margin-top:34px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:14px 26px; border-radius:999px; border:1px solid var(--ink);
+    background:var(--ink); color:var(--paper); text-decoration:none;
+    font-size:14px; letter-spacing:0.03em; cursor:pointer; transition:all .2s;
+  }
+  .btn:hover{background:transparent; color:var(--ink);}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--taupe);}
+  .btn.ghost:hover{border-color:var(--ink);}
+  .btn.small{padding:10px 18px; font-size:13px;}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+
+  /* hoop illustration */
+  .hoop-hero{position:relative; aspect-ratio:1/1; max-width:420px; margin:0 auto;}
+  .hoop-hero svg{width:100%; height:100%;}
+  .stitch{stroke:var(--clay); stroke-dasharray:2 9; stroke-linecap:round; fill:none; animation:spin 60s linear infinite;}
+  .stitch2{stroke:var(--gold); stroke-dasharray:1 7; stroke-linecap:round; fill:none; animation:spin-rev 80s linear infinite;}
+  @keyframes spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+  @keyframes spin-rev{from{transform:rotate(360deg);} to{transform:rotate(0deg);}}
+
+  /* ---------- SECTION HEADS ---------- */
+  .section{padding:70px 32px;}
+  .section-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    max-width:1180px; margin:0 auto 40px; gap:24px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:20px;
+  }
+  .section-head h2{font-size:32px;}
+  .section-head p{color:var(--taupe); font-size:14px; max-width:340px;}
+
+  /* ---------- CATALOG ---------- */
+  .grid{
+    max-width:1180px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:36px 28px;
+  }
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:18px;
+    padding:26px; display:flex; flex-direction:column; align-items:center;
+    text-align:center; transition:transform .25s, box-shadow .25s;
+  }
+  .card:hover{transform:translateY(-4px); box-shadow:0 14px 30px -18px rgba(42,33,24,0.35);}
+  .hoop-frame{
+    width:180px; height:180px; border-radius:50%; position:relative;
+    display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+    background:var(--clay-soft); overflow:hidden;
+  }
+  .hoop-frame img{width:100%; height:100%; object-fit:cover;}
+  .hoop-frame .ph{font-family:'Space Mono',monospace; font-size:11px; color:var(--clay); letter-spacing:0.05em;}
+  .hoop-frame::after{
+    content:''; position:absolute; inset:-6px; border-radius:50%;
+    border:2px dashed var(--clay); opacity:0.55;
+  }
+  .card h3{font-size:19px; margin-bottom:4px;}
+  .card .price{font-family:'Space Mono',monospace; font-size:15px; color:var(--ink); margin-bottom:10px;}
+  .stock-tag{
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:0.03em;
+    padding:5px 12px; border-radius:999px; margin-bottom:16px; display:inline-block;
+  }
+  .stock-ok{background:#EAEFE4; color:var(--green);}
+  .stock-low{background:#F6EBD8; color:var(--amber);}
+  .stock-out{background:#EFEAE3; color:var(--taupe); text-decoration:line-through;}
+  .empty-state{
+    max-width:1180px; margin:0 auto; text-align:center; padding:60px 20px;
+    color:var(--taupe); font-size:15px;
+  }
+
+  /* ---------- SOBRE / ABOUT ---------- */
+  .about{
+    max-width:1180px; margin:0 auto; padding:70px 32px;
+    display:grid; grid-template-columns:0.8fr 1.2fr; gap:60px; align-items:center;
+  }
+  .about .frame{
+    aspect-ratio:4/5; border-radius:18px; background:var(--clay-soft);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .about .frame::before{
+    content:''; position:absolute; inset:14px; border:1px dashed var(--clay); border-radius:12px; opacity:0.5;
+  }
+  .about h2{font-size:30px; margin-bottom:18px;}
+  .about p{color:var(--taupe); margin-bottom:14px; max-width:520px;}
+
+  /* ---------- CONTACT / FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line); padding:56px 32px 34px; margin-top:20px;
+  }
+  .foot-inner{
+    max-width:1180px; margin:0 auto; display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:30px;
+  }
+  .foot-inner h3{font-size:20px; margin-bottom:10px;}
+  .foot-inner p{color:var(--taupe); font-size:14px;}
+  .foot-links{display:flex; gap:22px; font-size:14px;}
+  .foot-links a{text-decoration:none; opacity:0.75;}
+  .foot-links a:hover{opacity:1;}
+  .foot-bottom{
+    max-width:1180px; margin:40px auto 0; padding-top:20px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; font-size:12px; color:var(--taupe); flex-wrap:wrap; gap:10px;
+  }
+  .admin-toggle{
+    background:none; border:none; color:var(--taupe); cursor:pointer; font-size:12px;
+    text-decoration:underline; opacity:0.6;
+  }
+  .admin-toggle:hover{opacity:1;}
+
+  /* ---------- MODAL ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(42,33,24,0.55); backdrop-filter:blur(2px);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--paper); border-radius:18px; max-width:460px; width:100%;
+    padding:32px; max-height:88vh; overflow-y:auto; position:relative;
+  }
+  .modal h3{font-size:22px; margin-bottom:6px;}
+  .modal .close{
+    position:absolute; top:18px; right:20px; background:none; border:none;
+    font-size:20px; cursor:pointer; color:var(--taupe);
+  }
+  .field{margin-top:16px;}
+  .field label{display:block; font-size:12px; letter-spacing:0.04em; color:var(--taupe); margin-bottom:6px;}
+  .field input, .field select, .field textarea{
+    width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:9px;
+    background:var(--bone); font-family:'Jost',sans-serif; font-size:14px; color:var(--ink);
+  }
+  .field textarea{resize:vertical; min-height:70px;}
+  .qty-row{display:flex; align-items:center; gap:14px; margin-top:16px;}
+  .qty-row button{
+    width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--bone);
+    cursor:pointer; font-size:16px;
+  }
+  .qty-row span{font-family:'Space Mono',monospace; min-width:24px; text-align:center;}
+  .modal-note{font-size:12px; color:var(--taupe); margin-top:18px; line-height:1.5;}
+
+  /* admin table */
+  .admin-list{margin-top:20px; display:flex; flex-direction:column; gap:12px;}
+  .admin-item{
+    border:1px solid var(--line); border-radius:12px; padding:14px;
+    display:grid; grid-template-columns:1fr 70px 70px 34px; gap:8px; align-items:center;
+  }
+  .admin-item input{padding:7px 9px; font-size:13px;}
+  .admin-item .del{
+    background:none; border:none; color:var(--clay); cursor:pointer; font-size:18px;
+  }
+  .divider{border:none; border-top:1px solid var(--line); margin:24px 0;}
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(10px);
+    background:var(--ink); color:var(--paper); padding:13px 22px; border-radius:999px;
+    font-size:13px; opacity:0; pointer-events:none; transition:all .3s; z-index:200;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .conn-dot{
+    display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px;
+    background:var(--taupe);
+  }
+  .conn-dot.ok{background:var(--green);}
+  .conn-dot.err{background:var(--clay);}
+
+  @media (max-width:880px){
+    nav.links{display:none;}
+    .hero{grid-template-columns:1fr; padding-top:48px;}
+    .hoop-hero{order:-1; max-width:260px;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .about{grid-template-columns:1fr;}
+  }
+  @media (max-width:520px){
+    .grid{grid-template-columns:1fr;}
+    .wrap, .section, .hero{padding-left:20px; padding-right:20px;}
+    .admin-item{grid-template-columns:1fr 1fr; grid-template-areas:"name name" "price stock" "del del";}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand">A L I <span>A</span> R T E</div>
+    <nav class="links">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#nosotros">Nosotras</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div>
+    <span class="eyebrow">Aros bordados · pedrería y mostacilla calibrada</span>
+    <h1>Cada puntada,<br><em>hecha a mano.</em></h1>
+    <p class="lead">Piezas únicas bordadas hilo a hilo, terminadas con pedrería y mostacillas calibradas una por una. Stock limitado — cuando se agota, se agota.</p>
+    <div class="cta-row">
+      <a href="#catalogo" class="btn">Ver catálogo</a>
+      <a href="#nosotros" class="btn ghost">Sobre ALIARTE</a>
+    </div>
+  </div>
+  <div class="hoop-hero">
+    <svg viewBox="0 0 300 300">
+      <circle class="stitch" cx="150" cy="150" r="120"/>
+      <circle class="stitch2" cx="150" cy="150" r="95"/>
+      <circle cx="150" cy="150" r="70" fill="none" stroke="#A65C4A" stroke-width="1" opacity="0.25"/>
+    </svg>
+  </div>
+</section>
+
+<section class="section" id="catalogo">
+  <div class="section-head">
+    <div>
+      <h2>Catálogo</h2>
+      <p>El stock que ves acá es el real — se actualiza apenas se reserva una pieza.</p>
+    </div>
+  </div>
+  <div class="grid" id="productGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    Todavía no hay piezas cargadas. Si sos vos, Male 👋 — entrá al panel desde el pie de página para agregar las primeras.
+  </div>
+</section>
+
+<section class="about" id="nosotros">
+  <div class="frame">
+    <svg viewBox="0 0 200 200" width="70%">
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#A65C4A" stroke-width="1.4" stroke-dasharray="3 8"/>
+      <circle cx="100" cy="100" r="50" fill="none" stroke="#B9924F" stroke-width="1.2" stroke-dasharray="1 6"/>
+    </svg>
+  </div>
+  <div>
+    <h2>Sobre ALIARTE</h2>
+    <p>ALIARTE nace de la aguja, el bastidor y la paciencia. Cada aro se borda a mano, se arma con pedrería seleccionada y se calibra mostacilla por mostacilla para que ninguna pieza salga igual a otra.</p>
+    <p>No trabajamos en serie — trabajamos en tandas chicas, así que el stock que ves en el catálogo es exactamente lo que hay disponible hoy.</p>
+  </div>
+</section>
+
+<footer id="contacto">
+  <div class="foot-inner">
+    <div>
+      <h3>A L I A R T E</h3>
+      <p id="footTagline">Aros bordados a mano.</p>
+    </div>
+    <div class="foot-links">
+      <a id="waLink" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      <a id="igLink" href="#" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span><span class="conn-dot" id="connDot"></span>© 2026 ALIARTE — hecho a mano, pieza a pieza.</span>
+    <button class="admin-toggle" id="openAdmin">panel</button>
+  </div>
+</footer>
+
+<!-- ---------- MODAL: RESERVAR ---------- -->
+<div class="overlay" id="reserveOverlay">
+  <div class="modal">
+    <button class="close" data-close>&times;</button>
+    <h3 id="reserveName">Producto</h3>
+    <p class="mono" id="reservePrice" style="color:var(--taupe); font-size:14px;"></p>
+    <div class="qty-row">
+      <button id="qtyMinus">−</button>
+      <span id="qtyVal">1</span>
+      <button id="qtyPlus">+</button>
+      <span style="color:var(--taupe); font-size:13px;" id="stockHint"></span>
+    </div>
+    <div class="field">
+      <label>Tu nombre</label>
+      <input type="text" id="buyerName" placeholder="¿Cómo te llamás?">
+    </div>
+    <div class="cta-row" style="margin-top:22px;">
+      <button class="btn" id="confirmReserve">Reservar por WhatsApp</button>
+    </div>
+    <p class="modal-note">Al confirmar, se descuenta del stock y se abre WhatsApp con tu pedido ya escrito para coordinar el pago y el envío con ALIARTE.</p>
+  </div>
+</div>
+
+<!-- ---------- MODAL: ADMIN ---------- -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal" style="max-width:640px;">
+    <button class="close" data-close>&times;</button>
+    <div id="adminGate">
+      <h3>Panel de ALIARTE</h3>
+      <p class="modal-note" style="margin-top:8px;">Este panel es solo para vos. Ingresá la clave para gestionar stock, precios y contacto.</p>
+      <div class="field">
+        <label>Clave</label>
+        <input type="password" id="adminPass" placeholder="••••••••">
+      </div>
+      <div class="cta-row" style="margin-top:18px;">
+        <button class="btn" id="adminEnter">Entrar</button>
+      </div>
+    </div>
+
+    <div id="adminPanel" style="display:none;">
+      <h3>Gestionar catálogo</h3>
+      <p class="modal-note">Los cambios se guardan al instante en la base de datos y ya se ven en el sitio para cualquiera que lo visite, desde cualquier celular o compu.</p>
+      <div class="admin-list" id="adminList"></div>
+      <button class="btn ghost small" id="addProduct" style="margin-top:14px;">+ Agregar pieza</button>
+
+      <hr class="divider">
+      <h3 style="font-size:17px;">Datos de contacto</h3>
+      <div class="field">
+        <label>WhatsApp (con código de país, sin +, ej: 5491122334455)</label>
+        <input type="text" id="settingWa">
+      </div>
+      <div class="field">
+        <label>Instagram (link completo)</label>
+        <input type="text" id="settingIg">
+      </div>
+      <div class="field">
+        <label>Frase corta del pie de página</label>
+        <input type="text" id="settingTag">
+      </div>
+      <div class="cta-row" style="margin-top:18px;">
+        <button class="btn" id="saveSettings">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     FIREBASE — así ven usuarios y así edita la vendedora el stock
+     ============================================================ -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* =====================================================================
+   1) PEGÁ ACÁ TUS DATOS DE FIREBASE
+   -----------------------------------------------------------------
+   Cómo conseguirlos (una sola vez, 5 minutos, todo con clicks):
+   1. Andá a https://console.firebase.google.com y creá un proyecto
+      (podés llamarlo "aliarte").
+   2. Adentro del proyecto: ⚙️ Configuración del proyecto > "Tus apps"
+      > ícono </> (Web) > registrá la app > Firebase te muestra un
+      bloque "firebaseConfig" con varios campos.
+   3. Copiá esos valores y reemplazá los de acá abajo.
+   4. En el menú izquierdo: "Compilación" > "Firestore Database" >
+      "Crear base de datos" > elegí modo de PRUEBA para empezar.
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBH84OI-_mxZI2Ki_vcS_18iDhdBSCjgu0",
+  authDomain: "aliarte.firebaseapp.com"
+  projectId: "aliarte",
+  storageBucket: "aliarte.firebasestorage.app",
+  messagingSenderId: "182852623850",
+  appId: "1:182852623850:web:51a7a7c575ddc2419ea693"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const productsDoc = db.collection('aliarte').doc('products');
+const settingsDoc = db.collection('aliarte').doc('settings');
+
+const ADMIN_PASSCODE = "aliarte2026"; // Male: cambiá esta palabra por la clave que quieras usar.
+
+let products = [];
+let settings = { whatsapp:"5491100000000", instagram:"https://instagram.com/aliarte", tagline:"Aros bordados a mano." };
+let activeProduct = null;
+let qty = 1;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+function setConnDot(state){
+  const dot = document.getElementById('connDot');
+  dot.className = 'conn-dot ' + state;
+}
+
+function seedProducts(){
+  return [
+    {id:'p1', name:'Aro Alba', price:8500, stock:4, desc:'Bordado en tonos beige con mostacilla dorada calibrada.', image:''},
+    {id:'p2', name:'Aro Terracota', price:9200, stock:2, desc:'Hilo terracota con pedrería en cristal.', image:''},
+    {id:'p3', name:'Aro Lino', price:7800, stock:0, desc:'Bordado minimalista en punto lino con detalle en oro viejo.', image:''}
+  ];
+}
+
+/* ---------- CARGA Y ESCUCHA EN TIEMPO REAL ---------- */
+function startListeners(){
+  productsDoc.onSnapshot(async (snap)=>{
+    if(snap.exists && snap.data().items){
+      products = snap.data().items;
+    }else{
+      products = seedProducts();
+      await productsDoc.set({ items: products });
+    }
+    renderCatalog();
+    if(document.getElementById('adminPanel').style.display !== 'none'){
+      renderAdminList();
+    }
+    setConnDot('ok');
+  }, (err)=>{
+    console.error(err);
+    setConnDot('err');
+    toast('No se pudo conectar con la base de datos. Revisá la configuración de Firebase.');
+  });
+
+  settingsDoc.onSnapshot(async (snap)=>{
+    if(snap.exists){
+      settings = snap.data();
+    }else{
+      await settingsDoc.set(settings);
+    }
+    renderFooter();
+  }, (err)=>{ console.error(err); });
+}
+
+async function saveProducts(){
+  await productsDoc.set({ items: products });
+}
+async function saveSettingsData(){
+  await settingsDoc.set(settings);
+}
+
+function money(n){
+  return '$ ' + Number(n).toLocaleString('es-AR');
+}
+
+function stockTag(stock){
+  if(stock <= 0) return `<span class="stock-tag stock-out">agotado</span>`;
+  if(stock <= 2) return `<span class="stock-tag stock-low">quedan ${stock}</span>`;
+  return `<span class="stock-tag stock-ok">quedan ${stock}</span>`;
+}
+
+function renderCatalog(){
+  const grid = document.getElementById('productGrid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+  if(products.length === 0){ empty.style.display='block'; return; }
+  empty.style.display='none';
+  products.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="hoop-frame">
+        ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="ph">foto<br>pendiente</span>`}
+      </div>
+      <h3>${p.name}</h3>
+      <div class="price mono">${money(p.price)}</div>
+      ${stockTag(p.stock)}
+      <button class="btn small" ${p.stock<=0?'disabled':''} data-reserve="${p.id}">
+        ${p.stock<=0?'Agotado':'Reservar'}
+      </button>
+    `;
+    grid.appendChild(card);
+  });
+  document.querySelectorAll('[data-reserve]').forEach(btn=>{
+    btn.addEventListener('click', ()=>openReserve(btn.getAttribute('data-reserve')));
+  });
+}
+
+function renderFooter(){
+  document.getElementById('footTagline').textContent = settings.tagline || 'Aros bordados a mano.';
+  document.getElementById('waLink').href = `https://wa.me/${settings.whatsapp}`;
+  document.getElementById('igLink').href = settings.instagram;
+}
+
+/* ---------- RESERVAR ---------- */
+function openReserve(id){
+  activeProduct = products.find(p=>p.id===id);
+  if(!activeProduct || activeProduct.stock<=0) return;
+  qty = 1;
+  document.getElementById('reserveName').textContent = activeProduct.name;
+  document.getElementById('reservePrice').textContent = money(activeProduct.price) + ' c/u';
+  document.getElementById('qtyVal').textContent = qty;
+  document.getElementById('stockHint').textContent = `(máx. ${activeProduct.stock})`;
+  document.getElementById('buyerName').value = '';
+  document.getElementById('reserveOverlay').classList.add('show');
+}
+document.getElementById('qtyMinus').onclick = ()=>{
+  if(qty>1){ qty--; document.getElementById('qtyVal').textContent=qty; }
+};
+document.getElementById('qtyPlus').onclick = ()=>{
+  if(activeProduct && qty<activeProduct.stock){ qty++; document.getElementById('qtyVal').textContent=qty; }
+};
+document.getElementById('confirmReserve').onclick = async ()=>{
+  const name = document.getElementById('buyerName').value.trim();
+  if(!name){ toast('Escribí tu nombre para reservar'); return; }
+  // Volvemos a leer el doc antes de descontar, para evitar pisar
+  // una reserva de otra persona que haya llegado justo antes.
+  const fresh = await productsDoc.get();
+  const freshItems = fresh.exists && fresh.data().items ? fresh.data().items : products;
+  const freshProduct = freshItems.find(p=>p.id===activeProduct.id);
+  if(!freshProduct || freshProduct.stock < qty){ toast('Ese stock ya no está disponible'); return; }
+  freshProduct.stock -= qty;
+  products = freshItems;
+  await saveProducts();
+  const msg = encodeURIComponent(`Hola ALIARTE! Soy ${name} y quiero reservar: ${qty} x ${activeProduct.name} (${money(activeProduct.price)} c/u). ¿Cómo seguimos con el pago y el envío?`);
+  window.open(`https://wa.me/${settings.whatsapp}?text=${msg}`, '_blank');
+  document.getElementById('reserveOverlay').classList.remove('show');
+  toast('¡Reserva enviada por WhatsApp!');
+};
+
+/* ---------- ADMIN ---------- */
+document.getElementById('openAdmin').onclick = ()=>{
+  document.getElementById('adminOverlay').classList.add('show');
+  document.getElementById('adminGate').style.display='block';
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('adminPass').value='';
+};
+document.getElementById('adminEnter').onclick = ()=>{
+  if(document.getElementById('adminPass').value === ADMIN_PASSCODE){
+    document.getElementById('adminGate').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    renderAdminList();
+    document.getElementById('settingWa').value = settings.whatsapp;
+    document.getElementById('settingIg').value = settings.instagram;
+    document.getElementById('settingTag').value = settings.tagline;
+  }else{
+    toast('Clave incorrecta');
+  }
+};
+
+function renderAdminList(){
+  const list = document.getElementById('adminList');
+  list.innerHTML = '';
+  products.forEach(p=>{
+    const row = document.createElement('div');
+    row.className = 'admin-item';
+    row.innerHTML = `
+      <input type="text" value="${p.name}" data-field="name">
+      <input type="number" value="${p.price}" data-field="price">
+      <input type="number" value="${p.stock}" data-field="stock" min="0">
+      <button class="del" data-del>&times;</button>
+    `;
+    row.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('change', async ()=>{
+        const field = inp.getAttribute('data-field');
+        p[field] = field==='name' ? inp.value : Number(inp.value);
+        await saveProducts();
+      });
+    });
+    row.querySelector('[data-del]').addEventListener('click', async ()=>{
+      products = products.filter(x=>x.id!==p.id);
+      await saveProducts();
+      renderAdminList();
+    });
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('addProduct').onclick = async ()=>{
+  products.push({id:'p'+Date.now(), name:'Pieza nueva', price:0, stock:0, desc:'', image:''});
+  await saveProducts();
+  renderAdminList();
+};
+
+document.getElementById('saveSettings').onclick = async ()=>{
+  settings.whatsapp = document.getElementById('settingWa').value.replace(/\D/g,'');
+  settings.instagram = document.getElementById('settingIg').value.trim();
+  settings.tagline = document.getElementById('settingTag').value.trim();
+  await saveSettingsData();
+  toast('Datos guardados');
+};
+
+/* ---------- OVERLAYS ---------- */
+document.querySelectorAll('[data-close]').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    e.target.closest('.overlay').classList.remove('show');
+  });
+});
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click', (e)=>{
+    if(e.target === ov) ov.classList.remove('show');
+  });
+});
+
+startListeners();
+</script>
+</body>
+</html>
