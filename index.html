@@ -121,16 +121,32 @@
     max-width:1180px; margin:0 auto;
     display:grid; grid-template-columns:repeat(3,1fr); gap:36px 28px;
   }
-  .card{
+
+  /* tarjeta con giro 3D: al tocar la foto o "Volver", gira y muestra la descripción */
+  .card-flip{ perspective:1300px; height:430px; }
+  .card-flip-inner{
+    position:relative; width:100%; height:100%;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .card-flip.flipped .card-flip-inner{ transform:rotateY(180deg); }
+  .card-face{
+    position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
     background:var(--paper); border:1px solid var(--line); border-radius:18px;
     padding:26px; display:flex; flex-direction:column; align-items:center;
-    text-align:center; transition:transform .25s, box-shadow .25s;
+    text-align:center; box-shadow:0 4px 14px -10px rgba(42,33,24,0.18);
   }
-  .card:hover{transform:translateY(-4px); box-shadow:0 14px 30px -18px rgba(42,33,24,0.35);}
+  .card-back{ transform:rotateY(180deg); justify-content:center; }
+  .back-title{font-size:19px; margin-bottom:12px;}
+  .back-desc{
+    color:var(--taupe); font-size:14px; line-height:1.6; margin-bottom:22px;
+    max-height:180px; overflow-y:auto;
+  }
+
   .hoop-frame{
     width:180px; height:180px; border-radius:50%; position:relative;
     display:flex; align-items:center; justify-content:center; margin-bottom:18px;
-    background:var(--clay-soft); overflow:hidden;
+    background:var(--clay-soft); overflow:hidden; cursor:pointer;
   }
   .hoop-frame img{width:100%; height:100%; object-fit:cover;}
   .hoop-frame .ph{font-family:'Space Mono',monospace; font-size:11px; color:var(--clay); letter-spacing:0.05em;}
@@ -138,8 +154,8 @@
     content:''; position:absolute; inset:-6px; border-radius:50%;
     border:2px dashed var(--clay); opacity:0.55;
   }
-  .card h3{font-size:19px; margin-bottom:4px;}
-  .card .price{font-family:'Space Mono',monospace; font-size:15px; color:var(--ink); margin-bottom:10px;}
+  .card-front h3{font-size:19px; margin-bottom:4px;}
+  .card-front .price{font-family:'Space Mono',monospace; font-size:15px; color:var(--ink); margin-bottom:10px;}
   .stock-tag{
     font-family:'Space Mono',monospace; font-size:11px; letter-spacing:0.03em;
     padding:5px 12px; border-radius:999px; margin-bottom:16px; display:inline-block;
@@ -244,8 +260,14 @@
   }
   .admin-img img{width:100%; height:100%; object-fit:cover; display:block;}
   .admin-img-ph{font-size:8px; color:var(--taupe); text-align:center; line-height:1.3; letter-spacing:.03em;}
+  .admin-mid{display:flex; flex-direction:column; gap:8px; min-width:0;}
   .admin-fields{display:grid; grid-template-columns:1fr 70px 70px; gap:8px;}
   .admin-item input{padding:7px 9px; font-size:13px;}
+  .admin-desc{
+    width:100%; padding:8px 9px; font-size:12px; border:1px solid var(--line);
+    border-radius:8px; background:var(--bone); font-family:'Jost',sans-serif;
+    color:var(--ink); resize:vertical; min-height:44px;
+  }
   .admin-actions{display:flex; align-items:center; gap:8px;}
   .admin-upload-btn{
     cursor:pointer; white-space:nowrap; text-align:center; font-size:12px !important;
@@ -268,6 +290,16 @@
   }
   .conn-dot.ok{background:var(--green);}
   .conn-dot.err{background:var(--clay);}
+
+  /* ---------- HISTORIAL DE RESERVAS ---------- */
+  .res-item{
+    border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .res-info{display:flex; flex-direction:column; gap:2px;}
+  .res-info .res-main{font-size:14px;}
+  .res-info .res-meta{font-size:12px; color:var(--taupe);}
+  .res-item .del{background:none; border:none; color:var(--clay); cursor:pointer; font-size:18px;}
 
   @media (max-width:880px){
     nav.links{display:none;}
@@ -429,6 +461,14 @@
       <button class="btn ghost small" id="addProduct" style="margin-top:14px;">+ Agregar pieza</button>
 
       <hr class="divider">
+      <h3 style="font-size:17px;">Historial de reservas</h3>
+      <p class="modal-note">Quién reservó qué y cuándo — es privado, solo lo ves vos acá.</p>
+      <div class="admin-list" id="reservationsList"></div>
+      <div class="cta-row" style="margin-top:14px;">
+        <button class="btn ghost small" id="clearReservations">Vaciar historial</button>
+      </div>
+
+      <hr class="divider">
       <h3 style="font-size:17px;">Datos de contacto</h3>
       <div class="field">
         <label>WhatsApp (con código de país, sin +, ej: 5491122334455)</label>
@@ -484,11 +524,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const productsDoc = db.collection('aliarte').doc('products');
 const settingsDoc = db.collection('aliarte').doc('settings');
+const reservationsDoc = db.collection('aliarte').doc('reservations');
 
 const ADMIN_PASSCODE = "aliarte2026"; // Male: cambiá esta palabra por la clave que quieras usar.
 
 let products = [];
 let settings = { whatsapp:"5491100000000", instagram:"https://instagram.com/aliarte", tagline:"Aros bordados a mano." };
+let reservationHistory = [];
 let activeProduct = null;
 let qty = 1;
 
@@ -540,6 +582,13 @@ function startListeners(){
     }
     renderFooter();
   }, (err)=>{ console.error(err); });
+
+  reservationsDoc.onSnapshot((snap)=>{
+    reservationHistory = (snap.exists && snap.data().items) ? snap.data().items : [];
+    if(document.getElementById('adminPanel').style.display !== 'none'){
+      renderReservationsList();
+    }
+  }, (err)=>{ console.error(err); });
 }
 
 async function saveProducts(){
@@ -547,6 +596,9 @@ async function saveProducts(){
 }
 async function saveSettingsData(){
   await settingsDoc.set(settings);
+}
+async function saveReservations(){
+  await reservationsDoc.set({ items: reservationHistory });
 }
 
 function money(n){
@@ -567,22 +619,40 @@ function renderCatalog(){
   empty.style.display='none';
   products.forEach(p=>{
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card-flip';
+    card.setAttribute('data-id', p.id);
+    const descTexto = p.desc && p.desc.trim() ? p.desc : 'Todavía no hay descripción para esta pieza.';
     card.innerHTML = `
-      <div class="hoop-frame">
-        ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="ph">foto<br>pendiente</span>`}
+      <div class="card-flip-inner">
+        <div class="card-face card-front">
+          <div class="hoop-frame" data-flip="${p.id}" title="Tocá para ver la descripción">
+            ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="ph">foto<br>pendiente</span>`}
+          </div>
+          <h3>${p.name}</h3>
+          <div class="price mono">${money(p.price)}</div>
+          ${stockTag(p.stock)}
+          <button class="btn small" ${p.stock<=0?'disabled':''} data-reserve="${p.id}">
+            ${p.stock<=0?'Agotado':'Reservar'}
+          </button>
+        </div>
+        <div class="card-face card-back">
+          <h3 class="back-title">${p.name}</h3>
+          <p class="back-desc">${descTexto}</p>
+          <button class="btn ghost small" data-flip="${p.id}">Volver</button>
+        </div>
       </div>
-      <h3>${p.name}</h3>
-      <div class="price mono">${money(p.price)}</div>
-      ${stockTag(p.stock)}
-      <button class="btn small" ${p.stock<=0?'disabled':''} data-reserve="${p.id}">
-        ${p.stock<=0?'Agotado':'Reservar'}
-      </button>
     `;
     grid.appendChild(card);
   });
   document.querySelectorAll('[data-reserve]').forEach(btn=>{
     btn.addEventListener('click', ()=>openReserve(btn.getAttribute('data-reserve')));
+  });
+  document.querySelectorAll('[data-flip]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const id = el.getAttribute('data-flip');
+      const cardFlip = grid.querySelector(`.card-flip[data-id="${id}"]`);
+      if(cardFlip) cardFlip.classList.toggle('flipped');
+    });
   });
 }
 
@@ -622,6 +692,21 @@ document.getElementById('confirmReserve').onclick = async ()=>{
   freshProduct.stock -= qty;
   products = freshItems;
   await saveProducts();
+
+  // Registramos la reserva en el historial (solo visible en el panel).
+  const freshRes = await reservationsDoc.get();
+  reservationHistory = (freshRes.exists && freshRes.data().items) ? freshRes.data().items : reservationHistory;
+  reservationHistory.unshift({
+    id: 'r'+Date.now(),
+    product: activeProduct.name,
+    qty: qty,
+    price: activeProduct.price,
+    buyer: name,
+    date: new Date().toISOString()
+  });
+  if(reservationHistory.length > 300) reservationHistory = reservationHistory.slice(0, 300);
+  await saveReservations();
+
   const msg = encodeURIComponent(`Hola ALIARTE! Soy ${name} y quiero reservar: ${qty} x ${activeProduct.name} (${money(activeProduct.price)} c/u). ¿Cómo seguimos con el pago y el envío?`);
   window.open(`https://wa.me/${settings.whatsapp}?text=${msg}`, '_blank');
   document.getElementById('reserveOverlay').classList.remove('show');
@@ -666,6 +751,7 @@ document.getElementById('adminEnter').onclick = ()=>{
     document.getElementById('adminGate').style.display='none';
     document.getElementById('adminPanel').style.display='block';
     renderAdminList();
+    renderReservationsList();
     document.getElementById('settingWa').value = settings.whatsapp;
     document.getElementById('settingIg').value = settings.instagram;
     document.getElementById('settingTag').value = settings.tagline;
@@ -685,10 +771,13 @@ function renderAdminList(){
         <img src="${p.image||''}" style="${p.image?'':'display:none'}">
         <span class="admin-img-ph" style="${p.image?'display:none':''}">sin foto</span>
       </div>
-      <div class="admin-fields">
-        <input type="text" value="${p.name}" data-field="name" placeholder="Nombre">
-        <input type="number" value="${p.price}" data-field="price" placeholder="Precio">
-        <input type="number" value="${p.stock}" data-field="stock" min="0" placeholder="Stock">
+      <div class="admin-mid">
+        <div class="admin-fields">
+          <input type="text" value="${p.name}" data-field="name" placeholder="Nombre">
+          <input type="number" value="${p.price}" data-field="price" placeholder="Precio">
+          <input type="number" value="${p.stock}" data-field="stock" min="0" placeholder="Stock">
+        </div>
+        <textarea class="admin-desc" data-field="desc" placeholder="Descripción del aro (se muestra al girar la tarjeta)">${p.desc||''}</textarea>
       </div>
       <div class="admin-actions">
         <label class="btn ghost small admin-upload-btn">
@@ -698,11 +787,15 @@ function renderAdminList(){
         <button class="del" data-del>&times;</button>
       </div>
     `;
-    row.querySelectorAll('input[data-field]').forEach(inp=>{
+    row.querySelectorAll('[data-field]').forEach(inp=>{
       inp.addEventListener('change', async ()=>{
         const field = inp.getAttribute('data-field');
-        p[field] = field==='name' ? inp.value : Number(inp.value);
+        p[field] = (field==='price' || field==='stock') ? Number(inp.value) : inp.value;
         await saveProducts();
+        if(field !== 'price' && field !== 'stock'){
+          // nombre o descripción cambiaron: refrescamos el catálogo para que se vea al instante
+          renderCatalog();
+        }
       });
     });
     row.querySelector('[data-img-input]').addEventListener('change', async (e)=>{
@@ -729,6 +822,46 @@ function renderAdminList(){
     list.appendChild(row);
   });
 }
+
+/* ---------- HISTORIAL DE RESERVAS (solo panel) ---------- */
+function renderReservationsList(){
+  const list = document.getElementById('reservationsList');
+  if(!list) return;
+  list.innerHTML = '';
+  if(reservationHistory.length === 0){
+    list.innerHTML = '<p class="modal-note">Todavía no hay reservas registradas.</p>';
+    return;
+  }
+  reservationHistory.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'res-item';
+    const fecha = new Date(r.date).toLocaleString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    row.innerHTML = `
+      <div class="res-info">
+        <span class="res-main mono">${r.qty} x ${r.product} — ${money(r.price * r.qty)}</span>
+        <span class="res-meta">${r.buyer} · ${fecha}</span>
+      </div>
+      <button class="del" data-del-res="${r.id}">&times;</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('[data-del-res]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      reservationHistory = reservationHistory.filter(x=>x.id !== btn.getAttribute('data-del-res'));
+      await saveReservations();
+      renderReservationsList();
+    });
+  });
+}
+
+document.getElementById('clearReservations').onclick = async ()=>{
+  if(reservationHistory.length === 0) return;
+  if(!confirm('¿Vaciar todo el historial de reservas? Esta acción no se puede deshacer.')) return;
+  reservationHistory = [];
+  await saveReservations();
+  renderReservationsList();
+  toast('Historial vaciado');
+};
 
 document.getElementById('addProduct').onclick = async ()=>{
   products.push({id:'p'+Date.now(), name:'Pieza nueva', price:0, stock:0, desc:'', image:''});
