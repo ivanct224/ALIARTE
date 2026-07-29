@@ -211,9 +211,23 @@
   .admin-list{margin-top:20px; display:flex; flex-direction:column; gap:12px;}
   .admin-item{
     border:1px solid var(--line); border-radius:12px; padding:14px;
-    display:grid; grid-template-columns:1fr 70px 70px 34px; gap:8px; align-items:center;
+    display:grid; grid-template-columns:56px 1fr auto; gap:10px; align-items:center;
   }
+  .admin-img{
+    width:56px; height:56px; border-radius:8px; overflow:hidden; background:var(--bone);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; position:relative;
+  }
+  .admin-img img{width:100%; height:100%; object-fit:cover; display:block;}
+  .admin-img-ph{font-size:8px; color:var(--taupe); text-align:center; line-height:1.3; letter-spacing:.03em;}
+  .admin-fields{display:grid; grid-template-columns:1fr 70px 70px; gap:8px;}
   .admin-item input{padding:7px 9px; font-size:13px;}
+  .admin-actions{display:flex; align-items:center; gap:8px;}
+  .admin-upload-btn{
+    cursor:pointer; white-space:nowrap; text-align:center; font-size:12px !important;
+    padding:9px 12px !important;
+  }
+  .admin-upload-btn input{display:none;}
   .admin-item .del{
     background:none; border:none; color:var(--clay); cursor:pointer; font-size:18px;
   }
@@ -241,7 +255,10 @@
   @media (max-width:520px){
     .grid{grid-template-columns:1fr;}
     .wrap, .section, .hero{padding-left:20px; padding-right:20px;}
-    .admin-item{grid-template-columns:1fr 1fr; grid-template-areas:"name name" "price stock" "del del";}
+    .admin-item{grid-template-columns:56px 1fr; grid-template-areas:"img fields" "img actions";}
+    .admin-item .admin-img{grid-area:img;}
+    .admin-item .admin-fields{grid-area:fields; grid-template-columns:1fr; gap:6px;}
+    .admin-item .admin-actions{grid-area:actions; margin-top:4px;}
   }
 </style>
 </head>
@@ -566,6 +583,32 @@ document.getElementById('confirmReserve').onclick = async ()=>{
   toast('¡Reserva enviada por WhatsApp!');
 };
 
+/* ---------- SUBIDA DE FOTOS ----------
+   Redimensiona y comprime la imagen en el navegador antes de
+   guardarla, para que no pese demasiado en la base de datos. */
+function resizeImageToDataUrl(file, maxSize, quality){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=>reject(new Error('No se pudo leer el archivo'));
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = ()=>reject(new Error('No se pudo leer la imagen'));
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > h && w > maxSize){ h = Math.round(h * (maxSize/w)); w = maxSize; }
+        else if(h >= w && h > maxSize){ w = Math.round(w * (maxSize/h)); h = maxSize; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 /* ---------- ADMIN ---------- */
 document.getElementById('openAdmin').onclick = ()=>{
   document.getElementById('adminOverlay').classList.add('show');
@@ -593,17 +636,45 @@ function renderAdminList(){
     const row = document.createElement('div');
     row.className = 'admin-item';
     row.innerHTML = `
-      <input type="text" value="${p.name}" data-field="name">
-      <input type="number" value="${p.price}" data-field="price">
-      <input type="number" value="${p.stock}" data-field="stock" min="0">
-      <button class="del" data-del>&times;</button>
+      <div class="admin-img">
+        <img src="${p.image||''}" style="${p.image?'':'display:none'}">
+        <span class="admin-img-ph" style="${p.image?'display:none':''}">sin foto</span>
+      </div>
+      <div class="admin-fields">
+        <input type="text" value="${p.name}" data-field="name" placeholder="Nombre">
+        <input type="number" value="${p.price}" data-field="price" placeholder="Precio">
+        <input type="number" value="${p.stock}" data-field="stock" min="0" placeholder="Stock">
+      </div>
+      <div class="admin-actions">
+        <label class="btn ghost small admin-upload-btn">
+          ${p.image ? 'Cambiar foto' : 'Subir foto'}
+          <input type="file" accept="image/*" data-img-input>
+        </label>
+        <button class="del" data-del>&times;</button>
+      </div>
     `;
-    row.querySelectorAll('input').forEach(inp=>{
+    row.querySelectorAll('input[data-field]').forEach(inp=>{
       inp.addEventListener('change', async ()=>{
         const field = inp.getAttribute('data-field');
         p[field] = field==='name' ? inp.value : Number(inp.value);
         await saveProducts();
       });
+    });
+    row.querySelector('[data-img-input]').addEventListener('change', async (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      if(!file.type.startsWith('image/')){ toast('Elegí un archivo de imagen'); return; }
+      try{
+        toast('Subiendo foto...');
+        const dataUrl = await resizeImageToDataUrl(file, 700, 0.72);
+        p.image = dataUrl;
+        await saveProducts();
+        renderAdminList();
+        toast('Foto guardada');
+      }catch(err){
+        console.error(err);
+        toast('No se pudo procesar la imagen');
+      }
     });
     row.querySelector('[data-del]').addEventListener('click', async ()=>{
       products = products.filter(x=>x.id!==p.id);
