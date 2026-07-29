@@ -258,14 +258,19 @@
 
   @media (max-width:880px){
     nav.links{display:none;}
-    .hero{grid-template-columns:1fr; padding-top:48px;}
-    .hoop-hero{order:-1; max-width:260px;}
+    .hero{grid-template-columns:1fr; padding-top:44px; padding-bottom:56px; gap:8px; text-align:center;}
+    .hero p.lead{margin-left:auto; margin-right:auto;}
+    .hero .cta-row{justify-content:center;}
+    .hoop-hero{order:0; max-width:170px; margin-top:36px; opacity:0.9;}
+    .stitch{stroke-width:1.4;}
+    .stitch2{stroke-width:1.4;}
     .grid{grid-template-columns:repeat(2,1fr);}
     .about{grid-template-columns:1fr;}
   }
   @media (max-width:520px){
     .grid{grid-template-columns:1fr;}
     .wrap, .section, .hero{padding-left:20px; padding-right:20px;}
+    .hoop-hero{max-width:140px; margin-top:30px;}
     .admin-item{grid-template-columns:56px 1fr; grid-template-areas:"img fields" "img actions";}
     .admin-item .admin-img{grid-area:img;}
     .admin-item .admin-fields{grid-area:fields; grid-template-columns:1fr; gap:6px;}
